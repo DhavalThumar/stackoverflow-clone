@@ -1,0 +1,7 @@
+*.pyc
+*~
+stackoverflow_clone/__pycache__
+env
+stackoverflow_clone/db.sqlite3
+stackoverflow_clone/static
+stackoverflow_clone/.DS_Store
