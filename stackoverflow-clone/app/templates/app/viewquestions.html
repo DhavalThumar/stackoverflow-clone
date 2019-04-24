@@ -1,0 +1,10 @@
+{% extends "app/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+{% for question in questions %}
+    <a href="{% url 'updatequestion' question.queid %}" > {{ question.que_title }}</a>
+    <br>
+{% endfor %}
+{% endblock %}
