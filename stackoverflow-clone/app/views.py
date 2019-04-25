@@ -118,12 +118,19 @@ def updateAnswer(request, queid=None, ansid=None):
         else:
             raise Http404
 
+    cmts = getComments(ansid)
     context = {
         "form" : form,
         "queid" : queid,
+        "cmts" : cmts,
     }
     template = "app/answer/updateanswer.html"
     return render(request, template, context)
+
+def getComments(ansid):
+    ansobj = models.Answer.objects.get(ansid = ansid)
+    cmtobj = models.CommentOnAnswer.objects.filter(ansid=ansobj)
+    return cmtobj
 
 @login_required
 def acceptAnswer(request, queid=None, ansid=None):
@@ -256,4 +263,5 @@ def postComment(request, queid=None, ansid=None):
         return render(request, template, context)
     else:
         raise Http404
+
 

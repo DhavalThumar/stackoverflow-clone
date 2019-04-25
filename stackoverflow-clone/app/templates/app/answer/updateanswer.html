@@ -15,9 +15,18 @@
 <br> {% endcomment %}
 <a href="{% url 'acceptanswer' queid=queid ansid=form.instance.ansid %}" > Accept Answer </a>
 <br>
-<a href="{% url 'favouriteanswer' queid=queid ansid=form.instance.ansid %}" > Favorite answer </a>
+<a href="{% url 'favouriteanswer' queid=queid ansid=form.instance.ansid %}" > Favorite Answer </a>
 <br>
 <a href="{% url 'upvoteanswer' queid=queid ansid=form.instance.ansid %}" > Upvote Answer </a>
 <br>
 <a href="{% url 'downvoteanswer' queid=queid ansid=form.instance.ansid %}" > Downvote Answer </a>
+<br>
+
+<h2>Comments</h2>
+{% for cmt in cmts %}
+    <a href="." > {{ cmt.cmt_desc }}</a>
+    <br>
+{% endfor %}
+<br>
+<a href="{% url 'createcomment' queid=queid ansid=form.instance.ansid %}" > Add Comment </a>
 {% endblock %}
