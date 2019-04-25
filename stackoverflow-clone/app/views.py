@@ -206,7 +206,6 @@ def upvoteAnswer(request, queid=None, ansid=None):
     else:
         raise Http404
     
-
 @login_required
 def downAnswer(request, queid=None, ansid=None):
     if queid and ansid:
