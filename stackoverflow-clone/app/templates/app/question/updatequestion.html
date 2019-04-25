@@ -1,0 +1,15 @@
+{% extends "app/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+
+<form method='POST' action="{% url 'updatequestion' form.instance.queid %}">
+{% csrf_token %}
+
+{{ form | crispy }}
+
+<input class='btn btn-primary'  type='submit' value='Submit'>
+</form>
+<a href="{% url 'answer' form.instance.queid %}" > Post Answer </a>
+{% endblock %}

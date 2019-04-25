@@ -134,3 +134,5 @@ STATIC_URL = '/static/'
 STATIC_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['static']))
 
 AUTH_PROFILE_MODULE = 'app.UserProfile'
+
+LOGIN_URL = 'login/'

@@ -17,15 +17,15 @@ app_name = 'app'
 
 urlpatterns = [
     # Examples:
-    url(r'^$', app.views.home, name='home'),
-    url(r'^contact$', app.views.contact, name='contact'),
-    url(r'^about$', app.views.about, name='about'),
-    url(r'^question$',
+    url(r'^$', app.views.viewQuestion, name='home'),
+    url(r'^que$',
         app.views.viewQuestion, name='viewquestion'),
-    url(r'^question/create$',
-        app.views.createQuestion, name='createquestion'),
-    url(r'^question/(?P<id>\d+)/$',
+    url(r'^que/create$',
+        app.views.postQuestion, name='createquestion'),
+    url(r'^que/(?P<id>\d+)/$',
         app.views.updateQuestion, name='updatequestion'),
+    url(r'^que/(?P<id>\d+)/ans$',
+        app.views.postAnswer, name='answer'),
     url(r'^signup/$', app.views.signup, name='signup'),
     url(r'^login/$',
         django.contrib.auth.views.login,

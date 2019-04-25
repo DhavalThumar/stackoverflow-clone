@@ -7,18 +7,6 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     reputationpoint = models.IntegerField(blank=True, null=True)
     
-# class User(models.Model):
-#     userid = models.AutoField(primary_key=True)
-#     username = models.CharField(max_length=45, blank=True, null=True)
-#     password = models.CharField(max_length=45, blank=True, null=True)
-    
-#     createdon = models.DateTimeField(blank=True, null=True)
-#     updatedon = models.DateTimeField(blank=True, null=True)
-
-#     class Meta:
-#         managed = False
-#         db_table = 'user'
-
 class Question(models.Model):
     queid = models.AutoField(primary_key=True)
     que_title = models.CharField(max_length=200, blank=True, null=True)
@@ -45,5 +33,4 @@ class Answer(models.Model):
     class Meta:
         managed = False
         db_table = 'answer'
-
 

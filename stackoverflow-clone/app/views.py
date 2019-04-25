@@ -7,7 +7,8 @@ from django.http import HttpRequest,HttpResponse,HttpResponseRedirect
 from django.template import RequestContext
 from datetime import datetime
 from django.urls import reverse
-from .forms import QuestionModelForm
+from .forms import QuestionModelForm, AnswerModelForm
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
@@ -73,8 +74,8 @@ def signup(request):
 
 #def createUser(request):
 #    return HttpResponse("Create User Page")
-
-def createQuestion(request):
+@login_required
+def postQuestion(request):
     form = QuestionModelForm(request.POST or None)
     if form.is_valid():
         obj = form.save(commit=False)
@@ -85,9 +86,10 @@ def createQuestion(request):
     context = {
         "form" : form,
     }
-    template = "app/createquestion.html"
+    template = "app/question/postquestion.html"
     return render(request, template, context)
 
+@login_required
 def updateQuestion(request, id=None):
     obj = get_object_or_404(models.Question, queid = id)
     form = QuestionModelForm(request.POST or None, instance=obj)
@@ -103,14 +105,31 @@ def updateQuestion(request, id=None):
     context = {
         "form" : form,
     }
-    template = "app/updatequestion.html"
+    template = "app/question/updatequestion.html"
     return render(request, template, context)
 
+@login_required
 def viewQuestion(request):
     obj = models.Question.objects.all()
     context = {
         "questions" : obj
     }
-    template = "app/viewquestions.html"
+    template = "app/question/viewquestions.html"
     return render(request, template, context)
 
+@login_required
+def postAnswer(request, id=None):
+    queobj = get_object_or_404(models.Question, queid = id)
+    form = AnswerModelForm(request.POST or None, instance = queobj)
+    if form.is_valid():
+        queid = models.Question.objects.get(queid=form.instance.queid)
+        obj = models.Answer(ans_desc=request.POST['ans_desc'], createdby = request.user, total_upvote = 0,
+                    total_downvote = 0, queid = queid)
+        obj.save()
+        return HttpResponseRedirect(reverse('viewquestion'))
+            
+    context = {
+        "form" : form,
+    }
+    template = "app/answer/postanswer.html"
+    return render(request, template, context)

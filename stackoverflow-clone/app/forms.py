@@ -27,6 +27,13 @@ class QuestionModelForm(forms.ModelForm):
             'que_tag',
         ]
 
+class AnswerModelForm(forms.ModelForm):
+    class Meta:
+        model = models.Answer
+        fields = [
+            'ans_desc',
+        ]
+
 
 
         

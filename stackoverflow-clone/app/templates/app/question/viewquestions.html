@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-
+<h1> Question List </h1>
 {% for question in questions %}
     <a href="{% url 'updatequestion' question.queid %}" > {{ question.que_title }}</a>
     <br>
