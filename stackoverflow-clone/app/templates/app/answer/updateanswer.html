@@ -1,0 +1,21 @@
+{% extends "app/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+
+<form method='POST' action="{% url 'updateanswer' queid=queid ansid=form.instance.ansid %}">
+{% csrf_token %}
+
+{{ form | crispy }}
+
+<input class='btn btn-primary'  type='submit' value='Submit'>
+</form>
+{% comment %} <a href="{% url 'answer' form.instance.queid %}" > Post New Answer </a>
+<br> {% endcomment %}
+<a href="{% url 'acceptanswer' queid=queid ansid=form.instance.ansid %}" > Accept Answer </a>
+<br>
+<a href="{% url 'favouriteanswer' queid=queid ansid=form.instance.ansid %}" > Favorite answer </a>
+{% comment %} <a href="{% url 'answer' form.instance.queid %}" > Post New Answer </a>
+<a href="{% url 'answer' form.instance.queid %}" > Post New Answer </a> {% endcomment %}
+{% endblock %}

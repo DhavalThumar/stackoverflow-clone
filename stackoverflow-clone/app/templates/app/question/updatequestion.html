@@ -11,5 +11,10 @@
 
 <input class='btn btn-primary'  type='submit' value='Submit'>
 </form>
-<a href="{% url 'answer' form.instance.queid %}" > Post Answer </a>
+<h1> Answers </h1>
+{% for answer in answers %}
+    <a href="{% url 'updateanswer' form.instance.queid answer.ansid %}" > {{ answer.ans_desc }}</a>
+    <br>
+{% endfor %}
+<a href="{% url 'answer' form.instance.queid %}" > Post New Answer </a>
 {% endblock %}

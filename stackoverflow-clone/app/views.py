@@ -90,20 +90,21 @@ def postQuestion(request):
     return render(request, template, context)
 
 @login_required
-def updateQuestion(request, id=None):
-    obj = get_object_or_404(models.Question, queid = id)
+def updateQuestion(request, queid=None):
+    obj = get_object_or_404(models.Question, queid = queid)
     form = QuestionModelForm(request.POST or None, instance=obj)
     if form.is_valid():
         print("POST:",request.POST)
-        que = models.Question.objects.get(queid = id)
+        que = models.Question.objects.get(queid = queid)
         que.que_title = request.POST['que_title']
         que.que_desc = request.POST['que_desc']
         que.que_tag = request.POST['que_tag']
         que.save()
         return HttpResponseRedirect(reverse('viewquestion'))
-    
+    ans = models.Answer.objects.filter(queid=obj)
     context = {
         "form" : form,
+        "answers" : ans,
     }
     template = "app/question/updatequestion.html"
     return render(request, template, context)
@@ -118,8 +119,8 @@ def viewQuestion(request):
     return render(request, template, context)
 
 @login_required
-def postAnswer(request, id=None):
-    queobj = get_object_or_404(models.Question, queid = id)
+def postAnswer(request, queid=None):
+    queobj = get_object_or_404(models.Question, queid = queid)
     form = AnswerModelForm(request.POST or None, instance = queobj)
     if form.is_valid():
         que = models.Question.objects.get(queid=form.instance.queid)
@@ -133,17 +134,51 @@ def postAnswer(request, id=None):
     }
     template = "app/answer/postanswer.html"
     return render(request, template, context)
+    
+@login_required
+def updateAnswer(request, queid=None, ansid=None):
+    obj = get_object_or_404(models.Answer, ansid = ansid)
+    form = AnswerModelForm(request.POST or None, instance=obj)
+    if form.is_valid():
+        print("POST:",request.POST)
+        que = models.Question.objects.get(queid = queid)
+        que.que_title = request.POST['que_title']
+        que.que_desc = request.POST['que_desc']
+        que.que_tag = request.POST['que_tag']
+        que.save()
+        return HttpResponseRedirect(reverse('viewquestion'))
+    context = {
+        "form" : form,
+        "queid" : queid,
+    }
+    template = "app/answer/updateanswer.html"
+    return render(request, template, context)
 
 @login_required
 def acceptAnswer(request, queid=None, ansid=None):
     if queid and ansid:
         ans = models.Answer.objects.get(ansid=ansid)
         que = models.Question.objects.get(queid=ans.queid.queid)
-        if(que.queid != queid):
+        if(int(que.queid) == int(queid)):
+            obj = models.AcceptAnswer(queid=que,ansid=ans,userid=request.user)
+            obj.save()
+            return HttpResponseRedirect(reverse('viewquestion'))
+        else:
             raise Http404
-        obj = models.AcceptAnswer(queid=que,ansid=ans,userid=request.user)
-        obj.save()
-        return HttpResponseRedirect(reverse('viewquestion'))
+    else:
+        raise Http404
+
+@login_required
+def favouriteAnswer(request, queid=None, ansid=None):
+    if queid and ansid:
+        ans = models.Answer.objects.get(ansid=ansid)
+        que = models.Question.objects.get(queid=ans.queid.queid)
+        if(int(que.queid) == int(queid)):
+            obj = models.FavouriteAnswer(queid=que,ansid=ans,userid=request.user)
+            obj.save()
+            return HttpResponseRedirect(reverse('viewquestion'))
+        else: 
+            raise Http404
     else:
         raise Http404
     
