@@ -67,13 +67,6 @@ def signup(request):
         form = UserCreationForm()
     return render(request, 'app/signup.html', {'form': form})
 
-## Create your views here.
-#def index(request):
-#    return render(request, "app/index.html", {})
-#    # return HttpResponse("Hello, world.")
-
-#def createUser(request):
-#    return HttpResponse("Create User Page")
 @login_required
 def postQuestion(request):
     form = QuestionModelForm(request.POST or None)
@@ -81,6 +74,13 @@ def postQuestion(request):
         obj = form.save(commit=False)
         obj.createdby = request.user
         obj.save()
+        try:
+            usr = models.UserProfile.objects.get(user = request.user)
+            usr.reputationpoint = usr.reputationpoint + 1
+            usr.save()
+        except:
+            usr = models.UserProfile(user=request.user,reputationpoint=1)
+            usr.save()
         return HttpResponseRedirect(reverse('viewquestion'))
             
     context = {
@@ -140,7 +140,6 @@ def updateAnswer(request, queid=None, ansid=None):
     obj = get_object_or_404(models.Answer, ansid = ansid)
     form = AnswerModelForm(request.POST or None, instance=obj)
     if form.is_valid():
-        print("POST:",request.POST)
         que = models.Question.objects.get(queid = queid)
         que.que_title = request.POST['que_title']
         que.que_desc = request.POST['que_desc']
@@ -192,7 +191,15 @@ def upvoteAnswer(request, queid=None, ansid=None):
             obj = models.UpvoteAnswer(queid=que,ansid=ans,userid=request.user)
             obj.save()
             ans.total_upvote = ans.total_upvote + 1
-            ans.save() 
+            ans.save()
+
+            try:
+                usr = models.UserProfile.objects.get(user = request.user)
+                usr.reputationpoint = usr.reputationpoint + 1
+                usr.save()
+            except:
+                usr = models.UserProfile(user=request.user,reputationpoint=1)
+                usr.save()
             return HttpResponseRedirect(reverse('viewquestion'))
         else: 
             raise Http404
