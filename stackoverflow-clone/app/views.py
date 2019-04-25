@@ -10,6 +10,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from . import models
+from django.contrib.auth.models import User as UserModel
 
 def signup(request):
     if request.method == 'POST':
@@ -35,7 +36,7 @@ def postQuestion(request):
             queform.createdon = datetime.now()
             queform.updatedon = datetime.now()
             queform.save()
-            addReputationPoint(request)
+            addReputationPoint(request,request.user)
             return HttpResponseRedirect(reverse('viewquestion'))
             
     context = {
@@ -44,13 +45,13 @@ def postQuestion(request):
     template = "app/question/postquestion.html"
     return render(request, template, context)
 
-def addReputationPoint(request):
+def addReputationPoint(request, usr):
     try:
-        usr = models.UserProfile.objects.get(user = request.user)
+        usr = models.UserProfile.objects.get(user = usr)
         usr.reputationpoint = usr.reputationpoint + 1
         usr.save()
     except:
-        usr = models.UserProfile(user=request.user,reputationpoint=1)
+        usr = models.UserProfile(user=usr,reputationpoint=1)
         usr.save()
 
 @login_required
@@ -196,7 +197,8 @@ def upvoteAnswer(request, queid=None, ansid=None):
                 ans.total_upvote = ans.total_upvote + 1
                 ans.updatedon = datetime.now()
                 ans.save()
-                addReputationPoint(request)
+                usr = UserModel.objects.get(id=ans.createdby.id)
+                addReputationPoint(request,usr)
                 return HttpResponseRedirect(reverse('viewquestion'))
             else:
                 return HttpResponse("Already Upvoted")

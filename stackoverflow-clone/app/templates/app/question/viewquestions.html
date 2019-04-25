@@ -3,6 +3,8 @@
 
 {% block content %}
 <h1> Question List </h1>
+<a href="{% url 'createquestion' %}" > Post New Question </a>
+<br>
 {% for question in questions %}
     <a href="{% url 'updatequestion' question.queid %}" > {{ question.que_title }}</a>
     <br>
