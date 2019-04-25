@@ -26,6 +26,8 @@ urlpatterns = [
         app.views.updateQuestion, name='updatequestion'),
     url(r'^que/(?P<id>\d+)/ans$',
         app.views.postAnswer, name='answer'),
+    url(r'^que/(?P<queid>\d+)/ans/(?P<ansid>\d+)/accept$',
+        app.views.acceptAnswer, name='accept'),
     url(r'^signup/$', app.views.signup, name='signup'),
     url(r'^login/$',
         django.contrib.auth.views.login,

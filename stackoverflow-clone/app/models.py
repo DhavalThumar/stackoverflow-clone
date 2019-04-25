@@ -34,3 +34,12 @@ class Answer(models.Model):
         managed = False
         db_table = 'answer'
 
+class AcceptAnswer(models.Model):
+    acceptedansid = models.AutoField(primary_key=True)
+    queid = models.ForeignKey('Question', models.DO_NOTHING, db_column='queid', blank=True, null=True)
+    ansid = models.ForeignKey('Answer', models.DO_NOTHING, db_column='ansid', blank=True, null=True)
+    userid = models.ForeignKey(settings.AUTH_USER_MODEL,models.DO_NOTHING, db_column='userid', blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'acceptedanswer'

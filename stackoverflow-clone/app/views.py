@@ -3,7 +3,7 @@ Definition of views.
 """
 
 from django.shortcuts import render
-from django.http import HttpRequest,HttpResponse,HttpResponseRedirect
+from django.http import HttpRequest,HttpResponse,HttpResponseRedirect, Http404
 from django.template import RequestContext
 from datetime import datetime
 from django.urls import reverse
@@ -122,9 +122,9 @@ def postAnswer(request, id=None):
     queobj = get_object_or_404(models.Question, queid = id)
     form = AnswerModelForm(request.POST or None, instance = queobj)
     if form.is_valid():
-        queid = models.Question.objects.get(queid=form.instance.queid)
+        que = models.Question.objects.get(queid=form.instance.queid)
         obj = models.Answer(ans_desc=request.POST['ans_desc'], createdby = request.user, total_upvote = 0,
-                    total_downvote = 0, queid = queid)
+                    total_downvote = 0, queid = que)
         obj.save()
         return HttpResponseRedirect(reverse('viewquestion'))
             
@@ -133,3 +133,17 @@ def postAnswer(request, id=None):
     }
     template = "app/answer/postanswer.html"
     return render(request, template, context)
+
+@login_required
+def acceptAnswer(request, queid=None, ansid=None):
+    if queid and ansid:
+        ans = models.Answer.objects.get(ansid=ansid)
+        que = models.Question.objects.get(queid=ans.queid.queid)
+        if(que.queid != queid):
+            raise Http404
+        obj = models.AcceptAnswer(queid=que,ansid=ans,userid=request.user)
+        obj.save()
+        return HttpResponseRedirect(reverse('viewquestion'))
+    else:
+        raise Http404
+    
