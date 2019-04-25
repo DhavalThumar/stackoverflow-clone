@@ -181,4 +181,37 @@ def favouriteAnswer(request, queid=None, ansid=None):
             raise Http404
     else:
         raise Http404
+
+
+@login_required
+def upvoteAnswer(request, queid=None, ansid=None):
+    if queid and ansid:
+        ans = models.Answer.objects.get(ansid=ansid)
+        que = models.Question.objects.get(queid=ans.queid.queid)
+        if(int(que.queid) == int(queid)):
+            obj = models.UpvoteAnswer(queid=que,ansid=ans,userid=request.user)
+            obj.save()
+            ans.total_upvote = ans.total_upvote + 1
+            ans.save() 
+            return HttpResponseRedirect(reverse('viewquestion'))
+        else: 
+            raise Http404
+    else:
+        raise Http404
     
+
+@login_required
+def downAnswer(request, queid=None, ansid=None):
+    if queid and ansid:
+        ans = models.Answer.objects.get(ansid=ansid)
+        que = models.Question.objects.get(queid=ans.queid.queid)
+        if(int(que.queid) == int(queid)):
+            obj = models.DownvoteAnswer(queid=que,ansid=ans,userid=request.user)
+            obj.save()
+            ans.total_downvote = ans.total_downvote + 1
+            ans.save() 
+            return HttpResponseRedirect(reverse('viewquestion'))
+        else: 
+            raise Http404
+    else:
+        raise Http404

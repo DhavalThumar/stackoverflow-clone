@@ -6,6 +6,10 @@ from django.conf import settings
 class UserProfile(models.Model):  
     user = models.OneToOneField(User)
     reputationpoint = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'userprofile'
     
 class Question(models.Model):
     queid = models.AutoField(primary_key=True)
@@ -17,7 +21,7 @@ class Question(models.Model):
     createdby = models.ForeignKey(settings.AUTH_USER_MODEL, models.DO_NOTHING, db_column='createdby', blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'question'
         
 class Answer(models.Model):
@@ -31,7 +35,7 @@ class Answer(models.Model):
     queid = models.ForeignKey('Question', models.DO_NOTHING, db_column='queid', blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'answer'
 
 class AcceptAnswer(models.Model):
@@ -53,3 +57,23 @@ class FavouriteAnswer(models.Model):
     class Meta:
         managed = True
         db_table = 'favouriteanswer'
+
+class UpvoteAnswer(models.Model):
+    upvoteid = models.AutoField(primary_key=True)
+    queid = models.ForeignKey('Question', models.DO_NOTHING, db_column='queid', blank=True, null=True)
+    ansid = models.ForeignKey('Answer', models.DO_NOTHING, db_column='ansid', blank=True, null=True)
+    userid = models.ForeignKey(settings.AUTH_USER_MODEL,models.DO_NOTHING, db_column='userid', blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'upvoteanswer'
+
+class DownvoteAnswer(models.Model):
+    upvoteid = models.AutoField(primary_key=True)
+    queid = models.ForeignKey('Question', models.DO_NOTHING, db_column='queid', blank=True, null=True)
+    ansid = models.ForeignKey('Answer', models.DO_NOTHING, db_column='ansid', blank=True, null=True)
+    userid = models.ForeignKey(settings.AUTH_USER_MODEL,models.DO_NOTHING, db_column='userid', blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'downvoteanswer'

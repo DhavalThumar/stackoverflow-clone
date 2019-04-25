@@ -16,6 +16,8 @@
 <a href="{% url 'acceptanswer' queid=queid ansid=form.instance.ansid %}" > Accept Answer </a>
 <br>
 <a href="{% url 'favouriteanswer' queid=queid ansid=form.instance.ansid %}" > Favorite answer </a>
-{% comment %} <a href="{% url 'answer' form.instance.queid %}" > Post New Answer </a>
-<a href="{% url 'answer' form.instance.queid %}" > Post New Answer </a> {% endcomment %}
+<br>
+<a href="{% url 'upvoteanswer' queid=queid ansid=form.instance.ansid %}" > Upvote Answer </a>
+<br>
+<a href="{% url 'downvoteanswer' queid=queid ansid=form.instance.ansid %}" > Downvote Answer </a>
 {% endblock %}
