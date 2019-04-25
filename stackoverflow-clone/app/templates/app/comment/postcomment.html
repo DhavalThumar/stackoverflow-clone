@@ -1,0 +1,15 @@
+﻿{% extends "app/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+
+<form method='POST' action="{% url 'createcomment' queid=queid ansid=form.instance.ansid %}">
+{% csrf_token %}
+
+{{ form | crispy }}
+
+<input class='btn btn-primary'  type='submit' value='Submit'>
+</form>
+
+{% endblock %}

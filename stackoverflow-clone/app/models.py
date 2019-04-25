@@ -43,6 +43,8 @@ class AcceptAnswer(models.Model):
     queid = models.ForeignKey('Question', models.DO_NOTHING, db_column='queid', blank=True, null=True)
     ansid = models.ForeignKey('Answer', models.DO_NOTHING, db_column='ansid', blank=True, null=True)
     userid = models.ForeignKey(settings.AUTH_USER_MODEL,models.DO_NOTHING, db_column='userid', blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = True
@@ -53,7 +55,9 @@ class FavouriteAnswer(models.Model):
     queid = models.ForeignKey('Question', models.DO_NOTHING, db_column='queid', blank=True, null=True)
     ansid = models.ForeignKey('Answer', models.DO_NOTHING, db_column='ansid', blank=True, null=True)
     userid = models.ForeignKey(settings.AUTH_USER_MODEL,models.DO_NOTHING, db_column='userid', blank=True, null=True)
-
+    createdon = models.DateTimeField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    
     class Meta:
         managed = True
         db_table = 'favouriteanswer'
@@ -63,6 +67,8 @@ class UpvoteAnswer(models.Model):
     queid = models.ForeignKey('Question', models.DO_NOTHING, db_column='queid', blank=True, null=True)
     ansid = models.ForeignKey('Answer', models.DO_NOTHING, db_column='ansid', blank=True, null=True)
     userid = models.ForeignKey(settings.AUTH_USER_MODEL,models.DO_NOTHING, db_column='userid', blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = True
@@ -73,7 +79,22 @@ class DownvoteAnswer(models.Model):
     queid = models.ForeignKey('Question', models.DO_NOTHING, db_column='queid', blank=True, null=True)
     ansid = models.ForeignKey('Answer', models.DO_NOTHING, db_column='ansid', blank=True, null=True)
     userid = models.ForeignKey(settings.AUTH_USER_MODEL,models.DO_NOTHING, db_column='userid', blank=True, null=True)
-
+    createdon = models.DateTimeField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    
     class Meta:
         managed = True
         db_table = 'downvoteanswer'
+
+class CommentOnAnswer(models.Model):
+    cmtid = models.AutoField(primary_key=True)
+    queid = models.ForeignKey('Question', models.DO_NOTHING, db_column='queid', blank=True, null=True)
+    ansid = models.ForeignKey('Answer', models.DO_NOTHING, db_column='ansid', blank=True, null=True)
+    userid = models.ForeignKey(settings.AUTH_USER_MODEL,models.DO_NOTHING, db_column='userid', blank=True, null=True)
+    cmt_desc = models.TextField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'commentonanswer'

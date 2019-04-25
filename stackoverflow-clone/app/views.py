@@ -7,7 +7,7 @@ from django.http import HttpRequest,HttpResponse,HttpResponseRedirect, Http404
 from django.template import RequestContext
 from datetime import datetime
 from django.urls import reverse
-from .forms import QuestionModelForm, AnswerModelForm
+from .forms import QuestionModelForm, AnswerModelForm, CommentModelForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import login, authenticate
@@ -94,7 +94,6 @@ def updateQuestion(request, queid=None):
     obj = get_object_or_404(models.Question, queid = queid)
     form = QuestionModelForm(request.POST or None, instance=obj)
     if form.is_valid():
-        print("POST:",request.POST)
         que = models.Question.objects.get(queid = queid)
         que.que_title = request.POST['que_title']
         que.que_desc = request.POST['que_desc']
@@ -221,3 +220,24 @@ def downAnswer(request, queid=None, ansid=None):
             raise Http404
     else:
         raise Http404
+
+@login_required
+def postComment(request, queid=None, ansid=None):
+    if queid and ansid:
+        ans = models.Answer.objects.get(ansid=ansid)
+        que = models.Question.objects.get(queid=ans.queid.queid)
+        form = CommentModelForm(request.POST or None, instance = ans)
+        if form.is_valid():
+            obj = models.CommentOnAnswer(cmt_desc=request.POST['cmt_desc'], userid = request.user, queid = que, ansid = ans)
+            obj.save()
+            return HttpResponseRedirect(reverse('viewquestion'))
+            
+        context = {
+            "form" : form,
+            "queid" : queid,
+        }
+        template = "app/comment/postcomment.html"
+        return render(request, template, context)
+    else:
+        raise Http404
+

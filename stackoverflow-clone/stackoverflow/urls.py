@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^que/create$', app.views.postQuestion, name='createquestion'),
     url(r'^que/(?P<queid>\d+)/$', app.views.updateQuestion, name='updatequestion'),
     url(r'^que/(?P<queid>\d+)/ans/(?P<ansid>\d+)/$', app.views.updateAnswer, name='updateanswer'),
+    url(r'^que/(?P<queid>\d+)/ans/(?P<ansid>\d+)/comment$', app.views.postComment, name='createcomment'),
     url(r'^que/(?P<queid>\d+)/ans/(?P<ansid>\d+)/accept$', app.views.acceptAnswer, name='acceptanswer'),
     url(r'^que/(?P<queid>\d+)/ans/(?P<ansid>\d+)/favourite$', app.views.favouriteAnswer, name='favouriteanswer'),
     url(r'^que/(?P<queid>\d+)/ans/(?P<ansid>\d+)/upvote$', app.views.upvoteAnswer, name='upvoteanswer'),

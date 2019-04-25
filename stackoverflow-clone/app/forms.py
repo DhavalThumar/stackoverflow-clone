@@ -34,6 +34,14 @@ class AnswerModelForm(forms.ModelForm):
             'ans_desc',
         ]
 
+class CommentModelForm(forms.ModelForm):
+    class Meta:
+        model = models.CommentOnAnswer
+        fields = [
+            'cmt_desc',
+        ]
+        
+
 
 
         
