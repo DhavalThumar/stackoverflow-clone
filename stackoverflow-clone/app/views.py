@@ -1,7 +1,3 @@
-"""
-Definition of views.
-"""
-
 from django.shortcuts import render
 from django.http import HttpRequest,HttpResponse,HttpResponseRedirect, Http404
 from django.template import RequestContext
@@ -14,44 +10,6 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from . import models
-
-def home(request):
-    """Renders the home page."""
-    assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'app/index.html',
-        {
-            'title':'Home Page',
-            'year':datetime.now().year,
-        }
-    )
-
-def contact(request):
-    """Renders the contact page."""
-    assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'app/contact.html',
-        {
-            'title':'Contact',
-            'message':'Your contact page.',
-            'year':datetime.now().year,
-        }
-    )
-
-def about(request):
-    """Renders the about page."""
-    assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'app/about.html',
-        {
-            'title':'About',
-            'message':'Your application description page.',
-            'year':datetime.now().year,
-        }
-    )
 
 def signup(request):
     if request.method == 'POST':
@@ -70,18 +28,15 @@ def signup(request):
 @login_required
 def postQuestion(request):
     form = QuestionModelForm(request.POST or None)
-    if form.is_valid():
-        obj = form.save(commit=False)
-        obj.createdby = request.user
-        obj.save()
-        try:
-            usr = models.UserProfile.objects.get(user = request.user)
-            usr.reputationpoint = usr.reputationpoint + 1
-            usr.save()
-        except:
-            usr = models.UserProfile(user=request.user,reputationpoint=1)
-            usr.save()
-        return HttpResponseRedirect(reverse('viewquestion'))
+    if request.method == 'POST':
+        if form.is_valid():
+            queform = form.save(commit=False)
+            queform.createdby = request.user
+            queform.createdon = datetime.now()
+            queform.updatedon = datetime.now()
+            queform.save()
+            addReputationPoint(request)
+            return HttpResponseRedirect(reverse('viewquestion'))
             
     context = {
         "form" : form,
@@ -89,24 +44,39 @@ def postQuestion(request):
     template = "app/question/postquestion.html"
     return render(request, template, context)
 
+def addReputationPoint(request):
+    try:
+        usr = models.UserProfile.objects.get(user = request.user)
+        usr.reputationpoint = usr.reputationpoint + 1
+        usr.save()
+    except:
+        usr = models.UserProfile(user=request.user,reputationpoint=1)
+        usr.save()
+
 @login_required
 def updateQuestion(request, queid=None):
-    obj = get_object_or_404(models.Question, queid = queid)
-    form = QuestionModelForm(request.POST or None, instance=obj)
-    if form.is_valid():
-        que = models.Question.objects.get(queid = queid)
-        que.que_title = request.POST['que_title']
-        que.que_desc = request.POST['que_desc']
-        que.que_tag = request.POST['que_tag']
-        que.save()
-        return HttpResponseRedirect(reverse('viewquestion'))
-    ans = models.Answer.objects.filter(queid=obj)
+    queobj = get_object_or_404(models.Question, queid = queid)
+    form = QuestionModelForm(request.POST or None, instance=queobj)
+    if request.method == 'POST':
+        if form.is_valid():
+            queobj.que_title = request.POST['que_title']
+            queobj.que_desc = request.POST['que_desc']
+            queobj.que_tag = request.POST['que_tag']
+            queobj.updatedon = datetime.now()
+            queobj.save()
+            return HttpResponseRedirect(reverse('viewquestion'))
+    
+    answers = getAnswers(queid)
     context = {
         "form" : form,
-        "answers" : ans,
+        "answers" : answers,
     }
     template = "app/question/updatequestion.html"
     return render(request, template, context)
+
+def getAnswers(queid):
+    obj = get_object_or_404(models.Question, queid = queid)
+    return models.Answer.objects.filter(queid=obj)
 
 @login_required
 def viewQuestion(request):
@@ -121,13 +91,14 @@ def viewQuestion(request):
 def postAnswer(request, queid=None):
     queobj = get_object_or_404(models.Question, queid = queid)
     form = AnswerModelForm(request.POST or None, instance = queobj)
-    if form.is_valid():
-        que = models.Question.objects.get(queid=form.instance.queid)
-        obj = models.Answer(ans_desc=request.POST['ans_desc'], createdby = request.user, total_upvote = 0,
-                    total_downvote = 0, queid = que)
-        obj.save()
-        return HttpResponseRedirect(reverse('viewquestion'))
-            
+    if request.method == 'POST':
+        if form.is_valid():
+            obj = models.Answer(ans_desc=request.POST['ans_desc'], createdby = request.user, total_upvote = 0,
+                        total_downvote = 0, queid = queobj, createdon = datetime.now(), updatedon = datetime.now())
+            obj.save()
+            return HttpResponseRedirect(reverse('viewquestion'))
+        else:
+            raise Http404
     context = {
         "form" : form,
     }
@@ -136,15 +107,17 @@ def postAnswer(request, queid=None):
     
 @login_required
 def updateAnswer(request, queid=None, ansid=None):
-    obj = get_object_or_404(models.Answer, ansid = ansid)
-    form = AnswerModelForm(request.POST or None, instance=obj)
-    if form.is_valid():
-        que = models.Question.objects.get(queid = queid)
-        que.que_title = request.POST['que_title']
-        que.que_desc = request.POST['que_desc']
-        que.que_tag = request.POST['que_tag']
-        que.save()
-        return HttpResponseRedirect(reverse('viewquestion'))
+    ansobj = get_object_or_404(models.Answer, ansid = ansid)
+    form = AnswerModelForm(request.POST or None, instance=ansobj)
+    if request.method == 'POST':
+        if form.is_valid():
+            ansobj.ans_desc = request.POST['ans_desc']
+            ansobj.updatedon = datetime.now()
+            ansobj.save()
+            return HttpResponseRedirect(reverse('viewquestion'))
+        else:
+            raise Http404
+
     context = {
         "form" : form,
         "queid" : queid,
@@ -158,13 +131,25 @@ def acceptAnswer(request, queid=None, ansid=None):
         ans = models.Answer.objects.get(ansid=ansid)
         que = models.Question.objects.get(queid=ans.queid.queid)
         if(int(que.queid) == int(queid)):
-            obj = models.AcceptAnswer(queid=que,ansid=ans,userid=request.user)
-            obj.save()
-            return HttpResponseRedirect(reverse('viewquestion'))
+            if(checkappeted(request,queid,ansid)):
+                obj = models.AcceptAnswer(queid=que,ansid=ans,userid=request.user,createdon = datetime.now(), updatedon = datetime.now())
+                obj.save()
+                return HttpResponseRedirect(reverse('viewquestion'))
+            else:
+                return HttpResponse("Already Accepted")
         else:
             raise Http404
     else:
         raise Http404
+
+def checkappeted(request,queid,ansid):
+    ans = models.Answer.objects.get(ansid=ansid)
+    que = models.Question.objects.get(queid=ans.queid.queid)
+    acceptobj = models.AcceptAnswer.objects.filter(queid=que,ansid=ans,userid=request.user)
+    if acceptobj.count() == 0:
+        return True
+    else:
+        return False
 
 @login_required
 def favouriteAnswer(request, queid=None, ansid=None):
@@ -172,14 +157,25 @@ def favouriteAnswer(request, queid=None, ansid=None):
         ans = models.Answer.objects.get(ansid=ansid)
         que = models.Question.objects.get(queid=ans.queid.queid)
         if(int(que.queid) == int(queid)):
-            obj = models.FavouriteAnswer(queid=que,ansid=ans,userid=request.user)
-            obj.save()
+            if(checkfavourite(request,queid,ansid)):
+                obj = models.FavouriteAnswer(queid=que,ansid=ans,userid=request.user,createdon = datetime.now(), updatedon = datetime.now())
+                obj.save()
+            else:
+                return HttpResponse("Already Fav")
             return HttpResponseRedirect(reverse('viewquestion'))
         else: 
             raise Http404
     else:
         raise Http404
 
+def checkfavourite(request,queid,ansid):
+    ans = models.Answer.objects.get(ansid=ansid)
+    que = models.Question.objects.get(queid=ans.queid.queid)
+    favobj = models.FavouriteAnswer.objects.filter(queid=que,ansid=ans,userid=request.user)
+    if favobj.count() == 0:
+        return True
+    else:
+        return False
 
 @login_required
 def upvoteAnswer(request, queid=None, ansid=None):
@@ -187,39 +183,58 @@ def upvoteAnswer(request, queid=None, ansid=None):
         ans = models.Answer.objects.get(ansid=ansid)
         que = models.Question.objects.get(queid=ans.queid.queid)
         if(int(que.queid) == int(queid)):
-            obj = models.UpvoteAnswer(queid=que,ansid=ans,userid=request.user)
-            obj.save()
-            ans.total_upvote = ans.total_upvote + 1
-            ans.save()
-
-            try:
-                usr = models.UserProfile.objects.get(user = request.user)
-                usr.reputationpoint = usr.reputationpoint + 1
-                usr.save()
-            except:
-                usr = models.UserProfile(user=request.user,reputationpoint=1)
-                usr.save()
-            return HttpResponseRedirect(reverse('viewquestion'))
+            if(checkupvote(request,queid,ansid)):
+                obj = models.UpvoteAnswer(queid=que,ansid=ans,userid=request.user,createdon = datetime.now(), updatedon = datetime.now())
+                obj.save()
+                ans.total_upvote = ans.total_upvote + 1
+                ans.updatedon = datetime.now()
+                ans.save()
+                addReputationPoint(request)
+                return HttpResponseRedirect(reverse('viewquestion'))
+            else:
+                return HttpResponse("Already Upvoted")
         else: 
             raise Http404
     else:
         raise Http404
+
+def checkupvote(request,queid,ansid):
+    ans = models.Answer.objects.get(ansid=ansid)
+    que = models.Question.objects.get(queid=ans.queid.queid)
+    upvoteobj = models.UpvoteAnswer.objects.filter(queid=que,ansid=ans,userid=request.user)
+    if upvoteobj.count() == 0:
+        return True
+    else:
+        return False
     
 @login_required
-def downAnswer(request, queid=None, ansid=None):
+def downvoteAnswer(request, queid=None, ansid=None):
     if queid and ansid:
         ans = models.Answer.objects.get(ansid=ansid)
         que = models.Question.objects.get(queid=ans.queid.queid)
         if(int(que.queid) == int(queid)):
-            obj = models.DownvoteAnswer(queid=que,ansid=ans,userid=request.user)
-            obj.save()
-            ans.total_downvote = ans.total_downvote + 1
-            ans.save() 
-            return HttpResponseRedirect(reverse('viewquestion'))
+            if(checkdownvote(request,queid,ansid)):
+                obj = models.DownvoteAnswer(queid=que,ansid=ans,userid=request.user,createdon = datetime.now(), updatedon = datetime.now())
+                obj.save()
+                ans.total_downvote = ans.total_downvote + 1
+                ans.updatedon = datetime.now()
+                ans.save() 
+                return HttpResponseRedirect(reverse('viewquestion'))
+            else:
+                return HttpResponse("Already Fav")
         else: 
             raise Http404
     else:
         raise Http404
+
+def checkdownvote(request,queid,ansid):
+    ans = models.Answer.objects.get(ansid=ansid)
+    que = models.Question.objects.get(queid=ans.queid.queid)
+    downvoteobj = models.DownvoteAnswer.objects.filter(queid=que,ansid=ans,userid=request.user)
+    if downvoteobj.count() == 0:
+        return True
+    else:
+        return False
 
 @login_required
 def postComment(request, queid=None, ansid=None):
@@ -228,7 +243,8 @@ def postComment(request, queid=None, ansid=None):
         que = models.Question.objects.get(queid=ans.queid.queid)
         form = CommentModelForm(request.POST or None, instance = ans)
         if form.is_valid():
-            obj = models.CommentOnAnswer(cmt_desc=request.POST['cmt_desc'], userid = request.user, queid = que, ansid = ans)
+            obj = models.CommentOnAnswer(cmt_desc=request.POST['cmt_desc'], userid = request.user, queid = que, ansid = ans,
+                    createdon = datetime.now(), updatedon = datetime.now())
             obj.save()
             return HttpResponseRedirect(reverse('viewquestion'))
             
