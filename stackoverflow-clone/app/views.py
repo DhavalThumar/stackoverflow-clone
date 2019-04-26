@@ -61,9 +61,9 @@ def updateQuestion(request, queid=None):
         form = QuestionModelForm(request.POST or None, instance=queobj)
         if request.method == 'POST':
             if form.is_valid():
-                queobj.que_title = request.POST['que_title']
-                queobj.que_desc = request.POST['que_desc']
-                queobj.que_tag = request.POST['que_tag']
+                queobj.que_title = form.cleaned_data.get('que_title')
+                queobj.que_desc = form.cleaned_data.get('que_desc')
+                queobj.que_tag = form.cleaned_data.get('que_tag')
                 queobj.updatedon = datetime.now()
                 queobj.save()
                 return HttpResponseRedirect(reverse('viewquestion'))
@@ -104,7 +104,7 @@ def postAnswer(request, queid=None):
     form = AnswerModelForm(request.POST or None, instance = queobj)
     if request.method == 'POST':
         if form.is_valid():
-            obj = models.Answer(ans_desc=request.POST['ans_desc'], createdby = request.user, total_upvote = 0,
+            obj = models.Answer(ans_desc=form.cleaned_data.get('ans_desc'), createdby = request.user, total_upvote = 0,
                         total_downvote = 0, queid = queobj, createdon = datetime.now(), updatedon = datetime.now())
             obj.save()
             return HttpResponseRedirect(reverse('viewquestion'))
@@ -124,7 +124,7 @@ def updateAnswer(request, queid=None, ansid=None):
         form = AnswerModelForm(request.POST or None, instance=ansobj)
         if request.method == 'POST':
             if form.is_valid():
-                ansobj.ans_desc = request.POST['ans_desc']
+                ansobj.ans_desc = form.cleaned_data.get('ans_desc')
                 ansobj.updatedon = datetime.now()
                 ansobj.save()
                 return HttpResponseRedirect(reverse('viewquestion'))
@@ -274,7 +274,7 @@ def postComment(request, queid=None, ansid=None):
         que = models.Question.objects.get(queid=ans.queid.queid)
         form = CommentModelForm(request.POST or None, instance = ans)
         if form.is_valid():
-            obj = models.CommentOnAnswer(cmt_desc=request.POST['cmt_desc'], userid = request.user, queid = que, ansid = ans,
+            obj = models.CommentOnAnswer(cmt_desc=form.cleaned_data.get('cmt_desc'), userid = request.user, queid = que, ansid = ans,
                     createdon = datetime.now(), updatedon = datetime.now())
             obj.save()
             return HttpResponseRedirect(reverse('viewquestion'))
