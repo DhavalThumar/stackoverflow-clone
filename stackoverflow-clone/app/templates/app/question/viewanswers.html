@@ -4,13 +4,6 @@
 {% block content %}
 
 
-<form method='POST' action="{% url 'updatequestion' queid %}">
-{% csrf_token %}
-
-{{ form | crispy }}
-
-<input class='btn btn-primary'  type='submit' value='Submit'>
-</form>
 <h1> Answers </h1>
 {% for answer in answers %}
     <a href="{% url 'updateanswer' queid answer.ansid %}" > {{ answer.ans_desc }}</a>

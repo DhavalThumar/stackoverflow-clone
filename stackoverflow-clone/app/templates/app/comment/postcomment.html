@@ -4,7 +4,7 @@
 {% block content %}
 
 
-<form method='POST' action="{% url 'createcomment' queid=queid ansid=form.instance.ansid %}">
+<form method='POST' action="{% url 'createcomment' queid=queid ansid=ansid %}">
 {% csrf_token %}
 
 {{ form | crispy }}

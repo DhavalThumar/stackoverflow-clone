@@ -1,0 +1,24 @@
+{% extends "app/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<h3 > {{ ansobj.ans_desc }} </h3>
+
+<a href="{% url 'acceptanswer' queid=queid ansid=ansid %}" > Accept Answer </a>
+<br>
+<a href="{% url 'favouriteanswer' queid=queid ansid=ansid %}" > Favorite Answer </a>
+<br>
+<a href="{% url 'upvoteanswer' queid=queid ansid=ansid %}" > Upvote Answer </a>
+<br>
+<a href="{% url 'downvoteanswer' queid=queid ansid=ansid %}" > Downvote Answer </a>
+<br>
+
+<h2>Comments</h2>
+{% for cmt in cmts %}
+    <a href="." > {{ cmt.cmt_desc }}</a>
+    <br>
+{% endfor %}
+<br>
+<a href="{% url 'createcomment' queid=queid ansid=ansid %}" > Add Comment </a>
+{% endblock %}

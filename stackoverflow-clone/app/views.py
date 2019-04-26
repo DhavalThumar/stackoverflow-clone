@@ -57,22 +57,32 @@ def addReputationPoint(request, usr):
 @login_required
 def updateQuestion(request, queid=None):
     queobj = get_object_or_404(models.Question, queid = queid)
-    form = QuestionModelForm(request.POST or None, instance=queobj)
-    if request.method == 'POST':
-        if form.is_valid():
-            queobj.que_title = request.POST['que_title']
-            queobj.que_desc = request.POST['que_desc']
-            queobj.que_tag = request.POST['que_tag']
-            queobj.updatedon = datetime.now()
-            queobj.save()
-            return HttpResponseRedirect(reverse('viewquestion'))
-    
-    answers = getAnswers(queid)
-    context = {
-        "form" : form,
-        "answers" : answers,
-    }
-    template = "app/question/updatequestion.html"
+    if(queobj.createdby == request.user):
+        form = QuestionModelForm(request.POST or None, instance=queobj)
+        if request.method == 'POST':
+            if form.is_valid():
+                queobj.que_title = request.POST['que_title']
+                queobj.que_desc = request.POST['que_desc']
+                queobj.que_tag = request.POST['que_tag']
+                queobj.updatedon = datetime.now()
+                queobj.save()
+                return HttpResponseRedirect(reverse('viewquestion'))
+        
+        answers = getAnswers(queid)
+        context = {
+            "form" : form,
+            "answers" : answers,
+            "queid" : queid,
+        }
+        template = "app/question/updatequestion.html"
+    else:
+        answers = getAnswers(queid)
+        context = {
+            "answers" : answers,
+            "queid" : queid,
+        }
+        template = "app/question/viewanswers.html"
+
     return render(request, template, context)
 
 def getAnswers(queid):
@@ -102,6 +112,7 @@ def postAnswer(request, queid=None):
             raise Http404
     context = {
         "form" : form,
+        "queid" : queid,
     }
     template = "app/answer/postanswer.html"
     return render(request, template, context)
@@ -109,23 +120,34 @@ def postAnswer(request, queid=None):
 @login_required
 def updateAnswer(request, queid=None, ansid=None):
     ansobj = get_object_or_404(models.Answer, ansid = ansid)
-    form = AnswerModelForm(request.POST or None, instance=ansobj)
-    if request.method == 'POST':
-        if form.is_valid():
-            ansobj.ans_desc = request.POST['ans_desc']
-            ansobj.updatedon = datetime.now()
-            ansobj.save()
-            return HttpResponseRedirect(reverse('viewquestion'))
-        else:
-            raise Http404
+    if(ansobj.createdby == request.user):
+        form = AnswerModelForm(request.POST or None, instance=ansobj)
+        if request.method == 'POST':
+            if form.is_valid():
+                ansobj.ans_desc = request.POST['ans_desc']
+                ansobj.updatedon = datetime.now()
+                ansobj.save()
+                return HttpResponseRedirect(reverse('viewquestion'))
+            else:
+                raise Http404
 
-    cmts = getComments(ansid)
-    context = {
-        "form" : form,
-        "queid" : queid,
-        "cmts" : cmts,
-    }
-    template = "app/answer/updateanswer.html"
+        cmts = getComments(ansid)
+        context = {
+            "form" : form,
+            "queid" : queid,
+            "cmts" : cmts,
+            "ansid" : ansid,
+        }
+        template = "app/answer/updateanswer.html"
+    else:
+        cmts = getComments(ansid)
+        context = {
+            "ansobj": ansobj,
+            "queid" : queid,
+            "cmts" : cmts,
+            "ansid" : ansid,
+        }
+        template = "app/answer/viewcomments.html"
     return render(request, template, context)
 
 def getComments(ansid):
@@ -260,6 +282,7 @@ def postComment(request, queid=None, ansid=None):
         context = {
             "form" : form,
             "queid" : queid,
+            "ansid" : ansid,
         }
         template = "app/comment/postcomment.html"
         return render(request, template, context)
